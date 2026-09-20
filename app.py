@@ -20,7 +20,7 @@ st.markdown("""
         color: #8ab4f8;
     }
     </style>
-""", unsafe_allow_html=style)
+""", unsafe_allow_html=True)
 
 st.title("🔍 Mini Google")
 
