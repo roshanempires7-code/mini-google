@@ -1,5 +1,6 @@
 import streamlit as st
 from google import genai
+from google.genai import types
 
 # Page Configuration
 st.set_page_config(page_title="Mini Google", page_icon="🔍", layout="centered")
@@ -35,9 +36,13 @@ if st.button("Google Search"):
                 api_key = st.secrets["GEMINI_API_KEY"]
                 client = genai.Client(api_key=api_key)
                 
+                # Google Search Grounding Tool Add Kar Diya Hai
                 response = client.models.generate_content(
                     model="gemini-3.6-flash",
-                    contents=query
+                    contents=query,
+                    config=types.GenerateContentConfig(
+                        tools=[{"google_search": {}}]
+                    )
                 )
                 
                 st.write("### Results:")
