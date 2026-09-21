@@ -46,7 +46,11 @@ if st.button("Mini Search"):
         with st.spinner("Searching Google AI servers..."):
             try:
                 # Backend initialization using Gemini online cloud servers
-                client = genai.Client()
+                # Purani line: client = genai.Client() ko mita kar yeh likhein:
+
+from google.genai.types import HttpOptions
+client = genai.Client(http_options=HttpOptions(api_version="v1"))
+
                 
                 # 1. Visual Search + Text Query
                 if uploaded_file and user_query:
