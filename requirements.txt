@@ -1,3 +1,5 @@
-google-genai
+openai
 Pillow
+streamlit
+
 
