@@ -1,8 +1,9 @@
 import streamlit as st
 from google import genai
+from google.genai.types import HttpOptions  # Yeh line top par daal di taake space ka jhanjhat khatam ho
 from PIL import Image
 
-# Google-like Professional Configuration
+# Google-like Professional Configuration with Lightning Icon
 st.set_page_config(page_title="Mini Google AI", page_icon="⚡", layout="centered")
 
 # Custom CSS for clean Google look
@@ -24,11 +25,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Main Title
+# Main Title with ⚡
 st.title("⚡ Mini Google AI")
 st.subheader("Mini google official platform")
 
-# Professional Input Boxes (Same as Google)
+# Professional Input Boxes
 user_query = st.text_input("Search or type a URL", placeholder="Ask Mini Google anything...")
 uploaded_file = st.file_uploader("Upload an Image to search with visuals", type=["png", "jpg", "jpeg"])
 
@@ -38,19 +39,15 @@ if uploaded_file is not None:
     uploaded_image = Image.open(uploaded_file)
     st.image(uploaded_image, caption="Visual Input Loaded", use_container_width=True)
 
-# Google Search Buttons Trigger
+# Mini Search Button Trigger
 if st.button("Mini Search"):
     if not user_query and not uploaded_file:
         st.warning("Please enter a query or upload an image first!")
     else:
         with st.spinner("Searching Google AI servers..."):
             try:
-                # Backend initialization using Gemini online cloud servers
-                # Purani line: client = genai.Client() ko mita kar yeh likhein:
-
-from google.genai.types import HttpOptions
-client = genai.Client(http_options=HttpOptions(api_version="v1"))
-
+                # 4 spaces de kar client setup kiya
+                client = genai.Client(http_options=HttpOptions(api_version="v1"))
                 
                 # 1. Visual Search + Text Query
                 if uploaded_file and user_query:
@@ -61,7 +58,7 @@ client = genai.Client(http_options=HttpOptions(api_version="v1"))
                     st.success("Google AI Search Results:")
                     st.write(response.text)
                 
-                # 2. Pure Visual Search (Image and text Only)
+                # 2. Pure Visual Search (Image Only)
                 elif uploaded_file:
                     response = client.models.generate_content(
                         model="gemini-1.5-flash",
