@@ -1,58 +1,80 @@
 import streamlit as st
-from google import genai
-from google.genai import types
+import ollama
+from PIL import Image
+import io
 
-# Page Configuration
-st.set_page_config(page_title="Mini Google", page_icon="🔍", layout="centered")
+# Roshan Empires Theme & Logo Setup
+st.set_page_config(page_title="Roshan Empires AI", page_icon="🔍")
+st.title("🔍 Roshan Empires - Mini Google AI")
+st.subheader("Mera Apna Custom Multimodal AI Platform")
 
-# UI Styling
-st.markdown("""
-    <style>
-    .main { text-align: center; }
-    div.stButton > button {
-        background-color: #303134;
-        color: #e8eaed;
-        border: 1px solid #5f6368;
-        border-radius: 4px;
-        padding: 8px 16px;
-    }
-    div.stButton > button:hover {
-        border-color: #8ab4f8;
-        color: #8ab4f8;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# User input text aur photo uploader box
+user_query = st.text_input("Ameer Hamza ke AI se kuch bhi poochein...", placeholder="E.g., Is photo mein kya hai?")
+uploaded_file = st.file_uploader("Koi bhi Photo upload karein (PNG/JPG)", type=["png", "jpg", "jpeg"])
 
-st.title("🔍 Mini Google")
+# Agar user photo upload kare
+uploaded_image = None
+if uploaded_file is not None:
+    uploaded_image = Image.open(uploaded_file)
+    st.image(uploaded_image, caption="Aapki Uploaded Photo", use_container_width=True)
 
-# Search Input (Unique Key Add Kar Di Hai Duplicate Error Khatam Karne Ke Liye)
-query = st.text_input("", placeholder="Search anything here...", label_visibility="collapsed", key="search_box_input")
-
-if st.button("Google Search"):
-    if query:
-        with st.spinner("Searching..."):
-            try:
-                api_key = st.secrets["GEMINI_API_KEY"]
-                client = genai.Client(api_key=api_key)
-                
-                # System Instruction: Ameer Hamza & Mini Google Identity
-                system_prompt = (
-                    "Aapka naam Mini Google hai. Aapko Ameer Hamza ne banaya aur design kiya hai. "
-                    "Jab bhi koi aapke creator, owner, ya aapke naam ke baare mein pooche, "
-                    "hamesha kahein ki aap Mini Google hain aur aapko Ameer Hamza ne banaya hai."
-                )
-                
-                response = client.models.generate_content(
-                    model="gemini-3.6-flash",
-                    contents=query,
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_prompt
-                    )
-                )
-                
-                st.write("### Results:")
-                st.write(response.text)
-            except Exception as e:
-                st.error(f"Error: {e}")
+# Main Button trigger
+if st.button("AI Search"):
+    if not user_query and not uploaded_file:
+        st.warning("Meharbani kar ke kuch likhein ya photo upload karein!")
     else:
-        st.warning("Please enter a query to search.")
+        with st.spinner("Roshan Empires AI processing kar raha hai..."):
+            try:
+                # 1. Agar user ne Photo aur Text dono diye hain
+                if uploaded_file and user_query:
+                    # Photo ko bytes mein convert karna local AI ke liye
+                    img_byte_arr = io.BytesIO()
+                    uploaded_image.save(img_byte_arr, format=uploaded_image.format)
+                    img_bytes = img_byte_arr.getvalue()
+                    
+                    # Local Llava model ko call karna jo text aur photo dono samajhta hai
+                    response = ollama.chat(
+                        model='llava',
+                        messages=[{
+                            'role': 'user',
+                            'content': user_query,
+                            'images': [img_bytes]
+                        }]
+                    )
+                    st.success("Results:")
+                    st.write(response['message']['content'])
+                
+                # 2. Agar user ne sirf Photo di hai bina text ke
+                elif uploaded_file:
+                    img_byte_arr = io.BytesIO()
+                    uploaded_image.save(img_byte_arr, format=uploaded_image.format)
+                    img_bytes = img_byte_arr.getvalue()
+                    
+                    response = ollama.chat(
+                        model='llava',
+                        messages=[{
+                            'role': 'user',
+                            'content': 'Is tasveer ko scan karo aur batao isme kya kya cheezein mojud hain detail mein.',
+                            'images': [img_bytes]
+                        }]
+                    )
+                    st.success("Results:")
+                    st.write(response['message']['content'])
+                
+                # 3. Agar user ne sirf Text likha hai
+                else:
+                    response = ollama.chat(
+                        model='llama3', # Ya jo bhi local text model aap chalana chahein
+                        messages=[{
+                            'role': 'user',
+                            'content': user_query
+                        }]
+                    )
+                    st.success("Results:")
+                    st.write(response['message']['content'])
+                    
+            except Exception as e:
+                st.error(f"AI Model connect nahi ho saka. Error: {str(e)}")
+                st.info("Tip: Apne laptop ke terminal mein 'ollama run llava' command chala kar check karein.")
+
+            
