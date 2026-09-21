@@ -1,7 +1,6 @@
 import streamlit as st
-import ollama
+from google import genai
 from PIL import Image
-import io
 
 # Roshan Empires Theme & Logo Setup
 st.set_page_config(page_title="Roshan Empires AI", page_icon="🔍")
@@ -25,56 +24,35 @@ if st.button("AI Search"):
     else:
         with st.spinner("Roshan Empires AI processing kar raha hai..."):
             try:
+                # Client automatic background secrets se key utha lega
+                client = genai.Client()
+                
                 # 1. Agar user ne Photo aur Text dono diye hain
                 if uploaded_file and user_query:
-                    # Photo ko bytes mein convert karna local AI ke liye
-                    img_byte_arr = io.BytesIO()
-                    uploaded_image.save(img_byte_arr, format=uploaded_image.format)
-                    img_bytes = img_byte_arr.getvalue()
-                    
-                    # Local Llava model ko call karna jo text aur photo dono samajhta hai
-                    response = ollama.chat(
-                        model='llava',
-                        messages=[{
-                            'role': 'user',
-                            'content': user_query,
-                            'images': [img_bytes]
-                        }]
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=[user_query, uploaded_image]
                     )
                     st.success("Results:")
-                    st.write(response['message']['content'])
+                    st.write(response.text)
                 
                 # 2. Agar user ne sirf Photo di hai bina text ke
                 elif uploaded_file:
-                    img_byte_arr = io.BytesIO()
-                    uploaded_image.save(img_byte_arr, format=uploaded_image.format)
-                    img_bytes = img_byte_arr.getvalue()
-                    
-                    response = ollama.chat(
-                        model='llava',
-                        messages=[{
-                            'role': 'user',
-                            'content': 'Is tasveer ko scan karo aur batao isme kya kya cheezein mojud hain detail mein.',
-                            'images': [img_bytes]
-                        }]
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=["Is tasveer ko scan karo aur batao isme kya kya cheezein mojud hain detail mein.", uploaded_image]
                     )
                     st.success("Results:")
-                    st.write(response['message']['content'])
+                    st.write(response.text)
                 
                 # 3. Agar user ne sirf Text likha hai
                 else:
-                    response = ollama.chat(
-                        model='llama3', # Ya jo bhi local text model aap chalana chahein
-                        messages=[{
-                            'role': 'user',
-                            'content': user_query
-                        }]
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=[user_query]
                     )
                     st.success("Results:")
-                    st.write(response['message']['content'])
+                    st.write(response.text)
                     
             except Exception as e:
                 st.error(f"AI Model connect nahi ho saka. Error: {str(e)}")
-                st.info("Tip: Apne laptop ke terminal mein 'ollama run llava' command chala kar check karein.")
-
-            
