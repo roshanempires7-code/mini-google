@@ -3,7 +3,7 @@ from google import genai
 from PIL import Image
 
 # Google-like Professional Configuration
-st.set_page_config(page_title="Mini Google AI", page_icon="🔍", layout="centered")
+st.set_page_config(page_title="Mini Google AI", page_icon="⚡", layout="centered")
 
 # Custom CSS for clean Google look
 st.markdown("""
@@ -25,7 +25,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Main Title
-st.title("🔍 Mini Google AI")
+st.title("⚡ Mini Google AI")
 st.subheader("Mini google official platform")
 
 # Professional Input Boxes (Same as Google)
@@ -57,7 +57,7 @@ if st.button("Mini Search"):
                     st.success("Google AI Search Results:")
                     st.write(response.text)
                 
-                # 2. Pure Visual Search (Image Only)
+                # 2. Pure Visual Search (Image and text Only)
                 elif uploaded_file:
                     response = client.models.generate_content(
                         model="gemini-1.5-flash",
@@ -69,7 +69,7 @@ if st.button("Mini Search"):
                 # 3. Standard Text Search
                 else:
                     response = client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model="gemini-1.5-flash",
                         contents=[user_query]
                     )
                     st.success("Google Search Results:")
