@@ -26,7 +26,7 @@ st.markdown("""
 
 # Main Title
 st.title("🔍 Mini Google AI")
-st.subheader("Roshan Empires Multimodal Platform")
+st.subheader("Mini google official platform")
 
 # Professional Input Boxes (Same as Google)
 user_query = st.text_input("Search or type a URL", placeholder="Ask Mini Google anything...")
@@ -39,7 +39,7 @@ if uploaded_file is not None:
     st.image(uploaded_image, caption="Visual Input Loaded", use_container_width=True)
 
 # Google Search Buttons Trigger
-if st.button("Google Search"):
+if st.button("Mini Search"):
     if not user_query and not uploaded_file:
         st.warning("Please enter a query or upload an image first!")
     else:
@@ -51,7 +51,7 @@ if st.button("Google Search"):
                 # 1. Visual Search + Text Query
                 if uploaded_file and user_query:
                     response = client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model="gemini-1.5-flash",
                         contents=[user_query, uploaded_image]
                     )
                     st.success("Google AI Search Results:")
@@ -60,7 +60,7 @@ if st.button("Google Search"):
                 # 2. Pure Visual Search (Image Only)
                 elif uploaded_file:
                     response = client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model="gemini-1.5-flash",
                         contents=["Scan this image thoroughly and describe all visible elements and context in detail.", uploaded_image]
                     )
                     st.success("Google Visual Search Results:")
